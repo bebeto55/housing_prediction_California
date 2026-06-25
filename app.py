@@ -22,16 +22,11 @@ with col1:
     housing_median_age = st.slider("Âge médian des logements",1,53,3)
     total_rooms = st.slider("Pièces", 2, 5699, 200)
     total_bedrooms = st.slider("Nombre de chambres",1,1190)
-    
 
 with col2:
-    
     population = st.slider("Population", 3, 3500, 300)
-    
     households = st.slider("Ménages",1,1150)
     median_income = st.slider("Revenu médian",0.499900,8.18,5.45)
-    
-
 
 ocean_proximity = st.selectbox(
     "Proximité de l'océan",
@@ -60,17 +55,24 @@ if st.button("🔮 Prédire le prix"):
 
     input_data["ocean_proximity"] = input_data["ocean_proximity"].fillna("INLAND")
 
-   
+    #encoder
 
-   
+    cat_encoded = encoder.transform(input_data[["ocean_proximity"]])
 
-    # Encode
-    X_encoded = encoder.transform(input_data)
+    cat_encoded = pd.DataFrame(
+        cat_encoded,
+        columns=encoder.get_feature_names_out(["ocean_proximity"])
+    )
 
-  
+    input_data = input_data.drop("ocean_proximity", axis=1)
+
+    input_data = pd.concat(
+        [input_data.reset_index(drop=True), cat_encoded],
+        axis=1
+    )
 
     # Scale
-    X_scaled = scaler.transform(X_encoded)
+    X_scaled = scaler.transform(input_data)
 
     # Predict
     prediction = model.predict(X_scaled)
